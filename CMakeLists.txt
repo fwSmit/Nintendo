@@ -17,32 +17,10 @@ project (Nintendo_project CXX)
 file(GLOB_RECURSE sources src/*.cpp src/*.h)
 file(GLOB_RECURSE data resources/*)
 
-add_executable(Nintendo ${sources} ${data})
+# add_executable(Nintendo ${sources} ${data})
+add_executable(Nintendo src/main.cpp src/encode.cpp ${data})
 
 #copy resources to build directory
 file(COPY ${data} DESTINATION resources)
 
-#armadillo library
-find_package(Armadillo REQUIRED)
-
-#include the necessary libraries
-find_package(SFML 2 REQUIRED system window graphics)
-find_package(TGUI REQUIRED)
-
-if(NOT SFML_FOUND)
-    message(FATAL_ERROR "Could not find SFML")
-endif()
-
-if(NOT TGUI_FOUND)
-    message(FATAL_ERROR "Could not find TGUI")
-endif()
-
-if(NOT ARMADILLO_FOUND)
-	message(FATAL_ERROR "Could not find armadillo")
-endif()
-
-include_directories(${SFML_INCLUDE_DIR})
-include_directories(${TGUI_INCLUDE_DIR})
-include_directories(${ARMADILLO_INCLUDE_DIRS})
-
-target_link_libraries(Nintendo ${SFML_LIBRARIES} ${TGUI_LIBRARY} ${ARMADILLO_LIBRARIES})
+target_link_libraries(Nintendo)

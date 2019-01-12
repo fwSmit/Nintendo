@@ -1,51 +1,84 @@
+#include "encode.h"
+#include <bitset>
+#include <cmath>
 #include <iostream>
-#include <armadillo>
-#include <SFML/Graphics.hpp>
-#include <TGUI/TGUI.hpp>
+#include <sstream>
+#include <cassert>
 
-int main()
-{
-	int ab =10;
-	if(!ab > 1){
-		std::cout << "ab is " << ab << std::endl;
-	}
-	else{
-		std::cout << "false" << std::endl;
-	}
-	std::cout << "Opening window" << std::endl;
-	sf::RenderWindow window(sf::VideoMode(500, 500), "Template works!");
-	tgui::Gui gui(window);
-	tgui::Button::Ptr button;
-	arma::fvec2 circlePos {250, 250};
-	sf::CircleShape shape(200.f);
-	shape.setPointCount(300);
-	shape.setOrigin(shape.getRadius(), shape.getRadius());
-	shape.setPosition(circlePos[0], circlePos[1]);
-	sf::Texture img;
-	if(!img.loadFromFile("resources/background.jpg")){
-		// could not load image
-		std::cout << "Could not find image" << std::endl;
+using namespace std;
+
+
+//void initializeVar(unsigned int* var, unsigned int value1, unsigned int value2, int size){
+	
+//}
+
+
+int main(int argc, char *argv[]){
+	if(argc == 1){
+		cout << "Please provide command line arguments SIZE 0xFFFFFFFF 0xFFFFFFFF" << endl;
 		return -1;
 	}
-	shape.setTexture(&img);
-
-	while (window.isOpen())
-	{
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			switch (event.type){
-				case sf::Event::Closed:
-					window.close();
-					break;
-				default:
-					break;
-			}
-		}
-
-		window.clear();
-		window.draw(shape);
-		//window.draw(img);
-		window.display();
+	if(argc < 4){
+		cout << "Too few arguments" << endl;
+		return -1;
 	}
+	if(argc > 4){
+		cout << "Too many arguments" << endl;
+		return -1;
+	}
+
+	int size;
+	std::stringstream convert(argv[1]); // set up a stringstream variable named convert, initialized with the input from argv[1]
+
+	if (!(convert >> size)) // do the conversion
+	{
+		cout << "Please input a number for SIZE" << endl;
+		return -1; // if conversion fails, set myint to a default value
+	}
+
+	unsigned int* a = new unsigned int[size / 16]; // <- input tab to encrypt
+
+	//cout << "size: " << size << endl;
+	for (int i = 0; i < size / 16; i++) {   // Read size / 16 integers to a
+		a[i] = int(strtoul(argv[2+i], nullptr, 16));
+	}
+	
+	std::vector<std::bitset<32>> convertedA = toBitset(a, size);
+	//cout << "before: " << endl;
+	//printValue(a, size);
+	//printValue(convertedA);
+	//cout << "after: " << endl;
+	// printBinary(toBitset( encode(a, size), size ));
+	printBinary(convertedA);
+	auto encoded1 = encode(a, size);
+	std::vector<std::bitset<32>> encoded2 = encode2(convertedA);
+	std::vector<std::bitset<32>> encoded3 = encode3(convertedA);
+	for(int i = 0; i < size/16; i++)
+	{
+		assert(encoded1[i] == (unsigned int)(encoded2[i].to_ulong()));
+		assert(encoded1[i] == (unsigned int)(encoded3[i].to_ulong()));
+	}
+	//printValue(encode2(convertedA));
+	printBinary(encoded3);
+	std::vector<std::bitset<32>> solution(size/16);
+	std::vector<std::bitset<32>> mustBeTrue(size/16);
+	std::vector<std::bitset<32>> mustBeFalse(size/16);
+	
+	
+	// solution[0][0] = encoded3[0][0];
+	// solution[1][0] = encoded3[0][0];
+	// solution[0][31] = encoded3[1][30];
+	// solution[1][31] = encoded3[1][30];
+	printBinary(solution);
+	std::vector<std::bitset<32>> correct(size/16);
+	for(int i = 0; i < size/16; i++){
+		correct[i] = ~( solution[i] ^ std::bitset<32>( a[i] ) );
+	}
+	printCorrect(correct);
+	printValue(encoded3);
+
+	/* 
+	   Good luck humans     
+	   */
+	return 0;
 }

@@ -1,7 +1,9 @@
 #include <iostream>
 #include <iomanip>
-#include <cstdlib>
+#include <sstream>
+#include <bitset>
 #include <cmath>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -41,15 +43,34 @@ unsigned int* encode(unsigned int* in, int size){
 	return b;
 }
 
-int main(int argc, char *argv[]){
+int main(){
 	int size;
 	std::cin >> size;
-	std::vector<string> in(size/16);
 	unsigned int* a = new unsigned int[size/16];
-	cout << "size: " << size;
+	std::vector <unsigned int> results;
+	cerr << "size: " << size << endl;
 	for (int i = 0; i < size / 16; i++) {   // Read size / 16 integers to a
-		cin >> in[i] 
-		a[i] = int(strtoul(in[i], nullptr, 16));
-		cout << "a " << i << " " << a[i] << endl;
+	    string temp;
+		cin >> temp;
+		a[i] = (unsigned int)(stoul(temp, nullptr, 16));
+		cerr << "a " << i << " " << a[i] << endl;
 	}
+	unsigned int* test = new unsigned int[size/16];
+	unsigned int* res = new unsigned int[size/16];
+	for(int i = 0; i < std::pow(2, 16); i++){
+	    for(int j = 0; j < std::pow(2, 16); j++){
+	        test[0] = i; 
+	        test[1] = j;
+	        res = encode(test, size);
+	        if(res[0] == a[0] && res[1] == a[1]){
+	            cerr << "found match "<< endl;
+	            cout << setfill('0') << setw(8) << hex << test[0];
+	            cout << " ";
+	            cout << setfill('0') << setw(8) << hex << test[1];
+	        }
+	    }
+	}
+    
+    
+    
 }
